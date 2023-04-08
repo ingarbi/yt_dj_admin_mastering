@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Book, Author
+from django.db.models import QuerySet
 
 # from django.utils.html import format_html
 from django.utils.html import mark_safe
@@ -14,6 +15,7 @@ class AuthorAdmin(admin.ModelAdmin):
     search_help_text = "search by name here"
     ordering = ("id",)
 
+
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = (
@@ -25,12 +27,22 @@ class BookAdmin(admin.ModelAdmin):
         "thumbnail_preview",
         "is_available",
     )
+    actions = ("make_books_availaible", )
     list_display_links = ("id", "name")
     list_filter = ("is_available",)
     search_fields = ("name",)
     readonly_fields = ("thumbnail_preview", "created_at", "updated_at")
     autocomplete_fields = ("author",)
     ordering = ("id",)
+    save_on_top = True
+    save_as = True
+    save_as_continue = True
+    empty_value_display = "-Пусто-"
+
+    def make_books_availaible(self, request, queryset: QuerySet):
+        queryset.update(is_available=True)
+
+    make_books_availaible.short_description = "Make Available"
 
     def thumbnail_preview(self, obj):
         if obj:
@@ -45,6 +57,7 @@ class BookAdmin(admin.ModelAdmin):
     # list_per_page = 2
     # date_hierarchy = "published_date"
     # raw_id_fields = ("author",)
+    # fields = ('name', "is_available", "author",)
 
     # def name_colored(self, obj):
     #     if obj.is_available:
